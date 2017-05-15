@@ -1,0 +1,247 @@
+'''
+Assume we have a csv file named Book1, which has the following data table ...
+
+Price	               Mass	                   Diameter	                        Months since production
+7.5	                  7	                       4	                                     1
+9.5	                  9	                       7	                                     3
+13.5	                11	                     10	                                     6
+18	                  15	                     13	                                     11
+19	                  18.5	                   16	                                     14
+
+Assume the data above is for steel balls manufactured by a certain firm, and we will apply linear and polynomial regression on it.
+
+'''		
+
+''' Linear Regression '''
+
+import numpy as np
+import pandas as pd 
+
+data_file = pd.read_csv("C:/Users/Owner/Desktop/Book1.csv")
+print(data_file)
+
+print(data_file[['Mass', 'Price']])    # To print only columns 'a' and 'b'
+data_file1 = data_file[['Mass', 'Price']]    
+
+X = data_file1[['Mass']]
+X0 = X.values.tolist()
+print(X0)  # To print the elements of the colum 'Mass' as values in a list
+
+Y = data_file1[['Price']]
+Y0 = Y.values.tolist()
+print(Y0)   # To print the elements of the column 'Price' as values in a list
+
+# Now we want to plot Mass vs Price
+
+import matplotlib.pyplot as plt     # The library required for plotting
+plt.figure()
+plt.title('Mass of metal balls vs their price')   # To include a title
+plt.xlabel('Mass in grams')      # for label on x-axis                 
+plt.ylabel('Price in dollars')   # for label on y-axis
+plt.plot(X0, Y0, 'k.')           # To plot the data
+plt.axis([0, 20, 0, 20])         # Domain from 0 to 20; range from 0 to 20
+plt.grid(True)                   # To show a grid
+plt.show()
+
+# To apply a linear regression model for the data:-
+from sklearn.linear_model import LinearRegression
+model = LinearRegression()
+model.fit(X0, Y0)
+
+# To print the predicted value of Price in dolalrs when the mass is 25 grams
+print(model.predict(25))     # Output: 27.15574246 dollars
+
+''' Residual sum of squares '''
+
+import numpy as np
+print(np.mean(model.predict(X0) - Y0)**2) # This prints the residual sum of squares (deviations predicted from actual empirical values of data)
+
+
+''' Solving ordinary least squares for simple linear regression '''
+
+import numpy as np
+
+# To print the variance of X0
+Var_X0 = np.var(X0, ddof = 0)
+print(Var_X0)
+
+# To print the variance of Y0  
+Var_Y0 = np.var(Y0, ddof = 0)
+print(Var_Y0)  
+
+# To print the covariance:-
+
+X1 = data_file1['Mass']
+Y1 = data_file1['Price']
+
+Cov_X1_Y1 = np.cov(X1, Y1, ddof = 0)[0][1]  
+print(Cov_X1_Y1)
+
+# Simple linear regression is given by the equation: y = alpha + beta*x
+
+beta = Cov_X1_Y1 / Var_X0
+print(beta)
+
+alpha = np.mean(Y1) - beta*np.mean(X1)
+print(alpha) 
+
+# The computed values above are those that minimize the cost function
+
+# The line print(model.predict(25)) when executed yields pretty much the 
+# same result as when typing 0.691125290023 + 25*1.05858468677 on a calculator
+
+
+
+''' Multiple linear regression '''
+
+# Model: y = alpha + beta_1 * x_1 + ... + beta_n * x_n
+
+# To perform multiple linear regression on the data utilized in this context ...
+
+# Model the data in the following manner: Y = BETA * X
+
+from numpy.linalg import inv
+from numpy import dot, transpose
+
+XX = data_file[['Mass', 'Diameter', 'Months since production']]
+print(XX)
+
+XX0 = XX.values.tolist()
+print(XX0)   # Will print a "matrix"
+# Use Y0
+
+# To find the values of beta 
+print(dot(inv(dot(transpose(XX0), XX0)), dot(transpose(XX0), Y0)))
+
+
+''' Polynomial regression '''
+
+# The following is an example for a quadratic regression
+# General formula: y = alpha + beta_1 * x + beta_2 * x^2
+
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.linear_model import LinearRegression
+from sklearn.preprocessing import PolynomialFeatures
+
+regressor = LinearRegression()
+regressor.fit(X0, Y0)
+xx = np.linspace(0, 26, 100)
+yy = regressor.predict(xx.reshape(xx.shape[0], 1))
+#plt.plot(xx, yy)
+
+quadratic = PolynomialFeatures(degree = 2) # Because we want a quadratic model  
+X0_quad = quadratic.fit_transform(X0)
+
+quadratic_regression = LinearRegression()
+quadratic_regression.fit(X0_quad, Y0)
+xx_quadratic = quadratic.transform(xx.reshape(xx.shape[0], 1))
+
+
+plt.plot(xx, quadratic_regression.predict(xx_quadratic))
+plt.title('Mass in grams vs Price in dollars')
+plt.xlabel('Mass in grams')
+plt.ylabel('Price in dollars')
+plt.axis([0, 25, 0, 25])
+plt.grid(True)
+plt.scatter(X0, Y0)
+plt.show()
+
+# To print the r-squared value in this case ...
+print(quadratic_regression.score(X0_quad, Y0))
+
+# For cubic regression:-
+
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.linear_model import LinearRegression
+from sklearn.preprocessing import PolynomialFeatures
+
+regressor = LinearRegression()
+regressor.fit(X0, Y0)
+xx = np.linspace(0, 26, 100)
+yy = regressor.predict(xx.reshape(xx.shape[0], 1))
+#plt.plot(xx, yy)
+
+cubic = PolynomialFeatures(degree = 3) # Because we want a cubic model  
+X0_cube = cubic.fit_transform(X0)
+
+cubic_regression = LinearRegression()
+cubic_regression.fit(X0_cube, Y0)
+xx_cubic = cubic.transform(xx.reshape(xx.shape[0], 1))
+
+
+plt.plot(xx, cubic_regression.predict(xx_cubic))
+plt.title('Mass in grams vs Price in dollars')
+plt.xlabel('Mass in grams')
+plt.ylabel('Price in dollars')
+plt.axis([0, 25, 0, 25])
+plt.grid(True)
+plt.scatter(X0, Y0)
+plt.show()
+
+# To print the r-squared value in this case ...
+print(cubic_regression.score(X0_cube, Y0))
+
+# Note that the r-squared value of the cubic regression is greater than that
+# of the quadratic regression, so a cubic regression model is more efficient
+# than a quadratic regression model for modeling the data 
+
+
+##############################################################################################################################
+
+
+''' Logistic Regression '''
+
+''' 
+In this part we will use the  breast cancer Wisconsin dataset, which is present in Python's scikit-learn library.
+
+'''
+
+
+from sklearn.datasets import load_breast_cancer
+
+cancer = load_breast_cancer()
+
+from sklearn.linear_model import LogisticRegression
+
+# Split arrays or matrices into random train and test subsets ...
+from sklearn.model_selection import train_test_split 
+
+import matplotlib.pyplot as plt
+
+X_train, X_test, y_train, y_test = train_test_split(cancer.data, cancer.target, stratify = cancer.target, random_state = 42)
+
+LogReg = LogisticRegression()
+
+print(LogReg.fit(X_train, y_train))
+
+print("The r-squared value is this case is:-")
+print(LogReg.score(X_train, y_train))
+
+# To plot ...
+
+plt.figure()
+plt.plot(X_train, y_train, 'k.')         
+plt.axis([-100, 3500, -0.5, 1.5])         
+plt.grid(True)                   
+plt.show()
+
+print(LogReg.fit(X_test, y_test))
+
+print("The r-squared value is this case is:-")
+print(LogReg.score(X_test, y_test))
+
+# To plot ...
+
+plt.figure()
+plt.plot(X_test, y_test, 'k.')         
+plt.axis([-100, 4500, -0.5, 1.5])         
+plt.grid(True)                   
+plt.show()
+
+
+
+
+
+
