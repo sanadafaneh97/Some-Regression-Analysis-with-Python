@@ -183,9 +183,8 @@ plt.show()
 # To print the r-squared value in this case ...
 print(cubic_regression.score(X0_cube, Y0))
 
-# Note that the r-squared value of the cubic regression is greater than that
-# of the quadratic regression, so a cubic regression model is more efficient
-# than a quadratic regression model for modeling the data 
+# Note that the r-squared value of the cubic regression is greater than that of the quadratic regression.
+# However, utilizing polynomial regression for our data set can be characterized as "overfitting". 
 
 
 ##############################################################################################################################
